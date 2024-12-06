@@ -475,7 +475,7 @@ class MQTTSensor(MQTTEntityBase):
         self.state_class = state_class
         self.check_before_send = "expire_after" not in kwargs
 
-        # Topics
+        # Topics #Foobar
         self.state_topic = f"homeassistant/{self._entity_type}/{self.entity_id}"
 
     @property
