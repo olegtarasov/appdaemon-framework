@@ -473,9 +473,12 @@ class MQTTSensor(MQTTEntityBase):
         # Config
         self.default_value = default_value
         self.state_class = state_class
+        # If we are using the expire_after feature, we need to disable the behavior of checking
+        # state value before sending the update. If we don't and sensor value doesn't change for more than
+        # expire_after, we will get a false expiration.
         self.check_before_send = "expire_after" not in kwargs
 
-        # Topics #Foobar
+        # Topics
         self.state_topic = f"homeassistant/{self._entity_type}/{self.entity_id}"
 
     @property
@@ -519,7 +522,6 @@ class MQTTSensor(MQTTEntityBase):
         }
 
         self.api.log(f"Configuring {self._entity_type} entity %s", self.entity_id)
-        self.api.log("Check befor send: %s", self.check_before_send)
         self.mqtt.mqtt_publish(
             self.config_topic,
             json.dumps(config),
