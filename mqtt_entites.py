@@ -473,6 +473,7 @@ class MQTTSensor(MQTTEntityBase):
         # Config
         self.default_value = default_value
         self.state_class = state_class
+        self.check_before_send = "expire_after" not in kwargs
 
         # Topics
         self.state_topic = f"homeassistant/{self._entity_type}/{self.entity_id}"
@@ -488,9 +489,10 @@ class MQTTSensor(MQTTEntityBase):
         if value is None:
             return
 
-        state = get_state_float(self.api, self.full_entity_id)
-        if state == value:
-            return
+        if self.check_before_send:
+            state = get_state_float(self.api, self.full_entity_id)
+            if state == value:
+                return
 
         self.namespace.set_state(self.full_entity_id, state=value)
         self.mqtt.mqtt_publish(self.state_topic, value, retain=True)
@@ -517,6 +519,7 @@ class MQTTSensor(MQTTEntityBase):
         }
 
         self.api.log(f"Configuring {self._entity_type} entity %s", self.entity_id)
+        self.api.log("Check befor send: %s", self.check_before_send)
         self.mqtt.mqtt_publish(
             self.config_topic,
             json.dumps(config),
