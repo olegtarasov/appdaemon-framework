@@ -466,7 +466,6 @@ class MQTTSensor(MQTTEntityBase):
         entity_name: str,
         default_value: float = 0,
         state_class: str = "measurement",
-        send_all: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(api, mqtt, namespace, prefix, entity_code, entity_name, kwargs)
@@ -474,7 +473,6 @@ class MQTTSensor(MQTTEntityBase):
         # Config
         self.default_value = default_value
         self.state_class = state_class
-        self.send_all = send_all
 
         # Topics
         self.state_topic = f"homeassistant/{self._entity_type}/{self.entity_id}"
@@ -490,10 +488,9 @@ class MQTTSensor(MQTTEntityBase):
         if value is None:
             return
 
-        if not self.send_all:
-            state = get_state_float(self.api, self.full_entity_id)
-            if state == value:
-                return
+        state = get_state_float(self.api, self.full_entity_id)
+        if state == value:
+            return
 
         self.namespace.set_state(self.full_entity_id, state=value)
         self.mqtt.mqtt_publish(self.state_topic, value, retain=True)
